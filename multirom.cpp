@@ -1336,10 +1336,14 @@ bool MultiROM::injectBoot(std::string img_path, bool only_if_older)
 	}
 	system("rm -r /tmp/boot");
 
-	if(img_path == m_boot_dev)
-		system_args("dd bs=4096 if=/tmp/newboot.img of=\"%s\"", m_boot_dev.c_str());
-	else
-		system_args("cp /tmp/newboot.img \"%s\"", img_path.c_str());
+	if(img_path == m_boot_dev) {
+		// Bump the new boot.img
+		system_args("cat /tmp/newboot.img /res/sign > /tmp/newboot_bumped.img");
+		system_args("dd bs=4096 if=/tmp/newboot_bumped.img of=\"%s\"", m_boot_dev.c_str());
+	} else {
+		system_args("cat /tmp/newboot.img /res/sign > /tmp/newboot_bumped.img");
+		system_args("cp /tmp/newboot_bumped.img \"%s\"", img_path.c_str());
+	}
 	return true;
 
 fail:
